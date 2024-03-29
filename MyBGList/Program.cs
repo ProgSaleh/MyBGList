@@ -13,7 +13,9 @@ builder.Services.AddSwaggerGen(opts =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+// Consider using Swagger only if the current env is configured to use it.
+if (app.Configuration.GetValue<bool>("UseSwagger"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
