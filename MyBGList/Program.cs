@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,9 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(opts =>
+builder.Services.AddSwaggerGen(options =>
 {
-    opts.ResolveConflictingActions((apiDesc) => apiDesc.First());
+    options.SwaggerDoc(
+        "v1",
+        new OpenApiInfo { Title = "MyBGList", Version = "v1.0" }
+    );
+    options.SwaggerDoc(
+        "v2",
+        new OpenApiInfo { Title = "MyBgList", Version = "v2.0" }
+    );
 });
 
 // handle CORS
@@ -36,13 +46,35 @@ builder.Services.AddCors(options =>
     );
 });
 
+// enable api versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+});
+
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    // set version format 1.2.3
+    options.GroupNameFormat = "'v'VVV";
+    // replace the placeholder {ApiVersion} with the version number.
+    options.SubstituteApiVersionInUrl = true;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+
+    // use two version v1, v2
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint($"/swagger/v1/swagger.json", "MyBGList v1");
+        options.SwaggerEndpoint($"/swagger/v2/swagger.json", "MyBgList v2");
+    });
 }
 
 
@@ -57,20 +89,37 @@ app.UseCors();
 
 app.UseAuthorization();
 
-app.MapGet("/error",
-    [EnableCors("AnyOrigin")]
-// Typically, error responses are not cached as they respond to specific errors.
-[ResponseCache(NoStore = true)]
+app.MapGet("/v{version:ApiVersion}/error",
+[ApiVersion("1.0")] // create v1 for this endpoint.
+[ApiVersion("2.0")] // create v1 for this endpoint.
+[EnableCors("AnyOrigin")] // any origin can use this endpoint.
+[ResponseCache(NoStore = true)] // Typically, error responses are not cached as they respond to specific errors.
 () => Results.Problem());
 
-app.MapGet("/error/test",
-    [EnableCors("AnyOrigin")]
-// Typically, error responses are not cached as they respond to specific errors.
-[ResponseCache(NoStore = true)]
+app.MapGet("/v{version:ApiVersion}/error/test",
+[ApiVersion("1.0")] // create v1 for this endpoint.
+[ApiVersion("2.0")] // create v1 for this endpoint.
+[EnableCors("AnyOrigin")] // any origin can use this endpoint.
+[ResponseCache(NoStore = true)] // Typically, error responses are not cached as they respond to specific errors.
 () =>
 {
     throw new Exception("Saleh, test!");
 });
+
+app.MapGet("/v{version:ApiVersion}/cod/test",
+[ApiVersion("1.0")] // create v1 for this endpoint.
+[ApiVersion("2.0")] // create v1 for this endpoint.
+[EnableCors("AnyOrigin")] // any origin can use this endpoint.
+[ResponseCache(NoStore = true)] // Typically, error responses are not cached as they respond to specific errors.
+() => Results.Text("<script>" +
+        "window.alert('Your client supports JavaScript!" +
+        "\\r\\n\\r\\n" +
+        $"Server time (UTC): {DateTime.UtcNow.ToString("o")}" +
+        "\\r\\n" +
+        "Client time (UTC): ' + new Date().toISOString());" +
+        "</script>" +
+        "<noscript>Your client does not support JavaScript</noscript>",
+        "text/html"));
 
 // If we want to add the flag "AnyOrigin" to a single endpoint
 // that exists in a controller, we'll have to add that flag for ALL controllers and all their endpoints.

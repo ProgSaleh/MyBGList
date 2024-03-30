@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MyBGList.DTO;
 
-namespace MyBGList.Controllers
+
+namespace MyBGList.Controllers.v1
 {
-    [Route("[controller]")]
+    [Route("/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class BoardGamesController : ControllerBase
     {
         private readonly ILogger<BoardGamesController> _logger;
@@ -17,10 +18,10 @@ namespace MyBGList.Controllers
         [HttpGet(Name = "GetBoardGames")]
         // Cache this response for 60sec 
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)]
-        public RestDTO<BoardGame[]> Get()
+        public DTO.v1.RestDTO<BoardGame[]> Get()
         {
             _logger.LogInformation("Saleh>>> visited the action method!");
-            return new RestDTO<BoardGame[]>()
+            return new DTO.v1.RestDTO<BoardGame[]>()
             {
                 Data = new BoardGame[]
                 {
@@ -43,9 +44,9 @@ namespace MyBGList.Controllers
                         Year = 2016
                     }
                 },
-                Links = new List<LinkDTO>
+                Links = new List<DTO.v1.LinkDTO>
                 {
-                    new LinkDTO(
+                    new DTO.v1.LinkDTO(
                         Url.Action(null, "BoardGames", null, Request.Scheme)!,
                         "self",
                         "GET"
