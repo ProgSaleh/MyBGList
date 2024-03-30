@@ -17,7 +17,7 @@ namespace MyBGList.Controllers.v1
 
         [HttpGet(Name = "GetBoardGames")]
         // Cache this response for 60sec 
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60, NoStore = true)]
         public DTO.v1.RestDTO<BoardGame[]> Get()
         {
             _logger.LogInformation("Saleh>>> visited the action method!");
