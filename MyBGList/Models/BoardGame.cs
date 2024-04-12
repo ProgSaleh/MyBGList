@@ -11,7 +11,6 @@ namespace MyBGList.Models
         [Required]
         public int Id { get; set; }
 
-
         [Required]
         [MaxLength(200)]
         public string Name { get; set; } = null!;
@@ -56,5 +55,25 @@ namespace MyBGList.Models
 
         public ICollection<BoardGames_Domains>? BoardGames_Domains { get; set; }
         public ICollection<BoardGames_Mechanics>? BoardGames_Mechanics { get; set; }
+
+        [MaxLength(200)]
+        public string? AlternateNames { get; set; }
+
+        [MaxLength(200)]
+        public string? Designer { get; set; }
+
+        [Required]
+        public int Flags { get; set; }
+
+        // foreignKey to reference the current boardGame's publisher.
+        // important when searching the db about a specific publisherId using boardgames...
+        [Required]
+        public int PublisherId { get; set; }
+
+        // For one-to-many rel. Every BoardGame record must have a publisher.
+        [Required]
+        public Publisher Publisher { get; set; } = null!;
+
+        public ICollection<BoardGames_Categories>? BoardGames_Categories { get; set; }
     }
 }

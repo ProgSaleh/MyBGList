@@ -47,6 +47,30 @@ namespace MyBGList.Models
                 .HasForeignKey(f => f.MechanicId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BoardGame>()
+                .HasOne(x => x.Publisher)
+                .WithMany(y => y.BoardGames)
+                .HasForeignKey(f => f.PublisherId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // We have to add the composite primary key this way in the EF Core.
+            modelBuilder.Entity<BoardGames_Categories>()
+                .HasKey(i => new { i.BoardGameId, i.CategoryId });
+
+            modelBuilder.Entity<BoardGames_Categories>()
+                .HasOne(x => x.BoardGame)
+                .WithMany(y => y.BoardGames_Categories)
+                .HasForeignKey(f => f.BoardGameId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<BoardGames_Categories>()
+                .HasOne(o => o.Category)
+                .WithMany(m => m.BoardGames_Categories)
+                .HasForeignKey(f => f.CategoryId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         // The following lines allow us to perform CRUD operations on the tables through EF Core.
@@ -55,5 +79,8 @@ namespace MyBGList.Models
         public DbSet<Mechanic> Mechanics => Set<Mechanic>();
         public DbSet<BoardGames_Domains> BoardGames_Domains => Set<BoardGames_Domains>();
         public DbSet<BoardGames_Mechanics> BoardGames_Mechanics => Set<BoardGames_Mechanics>();
+        public DbSet<Publisher> Publishers => Set<Publisher>();
+        public DbSet<Category> Categories => Set<Category>();
+        public DbSet<BoardGames_Categories> BoardGames_Categories => Set<BoardGames_Categories>();
     }
 }

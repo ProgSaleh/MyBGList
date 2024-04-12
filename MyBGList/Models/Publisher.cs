@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyBGList.Models
 {
-    [Table("Domains")]
-    public class Domain
+    [Table("Publishers")]
+    public class Publisher
     {
         [Key]
         [Required]
@@ -15,18 +15,12 @@ namespace MyBGList.Models
         public string Name { get; set; } = null!;
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         [Required]
         public DateTime LastModifiedDate { get; set; }
 
-        public ICollection<BoardGames_Domains>? BoardGames_Domains { get; set; }
-
         [Required]
-        public int Flags { get; set; }
-
-        [Required]
-        [MaxLength(200)]
-        public string? Notes { get; set; }
+        public ICollection<BoardGame>? BoardGames { get; set; }
     }
 }
