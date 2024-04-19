@@ -11,7 +11,6 @@ namespace MyBGList.Models
         [Required]
         public int Id { get; set; }
 
-
         [Required]
         [MaxLength(200)]
         public string Name { get; set; } = null!;
@@ -32,7 +31,7 @@ namespace MyBGList.Models
         public int MinAge { get; set; }
 
         [Required]
-        public int UserRated { get; set; }
+        public int UsersRated { get; set; }
 
         [Required]
         [Precision(4, 2)]
@@ -46,10 +45,10 @@ namespace MyBGList.Models
         public decimal ComplexityAverage { get; set; }
 
         [Required]
-        public int OwnedUser { get; set; }
+        public int OwnedUsers { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         [Required]
         public DateTime LastModifiedDate { get; set; }

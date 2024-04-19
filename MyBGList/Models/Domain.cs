@@ -15,7 +15,7 @@ namespace MyBGList.Models
         public string Name { get; set; } = null!;
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         [Required]
         public DateTime LastModifiedDate { get; set; }
