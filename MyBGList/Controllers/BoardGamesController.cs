@@ -30,7 +30,7 @@ namespace MyBGList.Controllers
         {
             var query = _context.BoardGames.AsQueryable();
             if (!string.IsNullOrEmpty(filterQuery))
-                query = query.Where(b => b.Name.Contains(filterQuery));
+                query = query.Where(b => b.Name.StartsWith(filterQuery));
             var recordCount = await query.CountAsync();
             query = query
                     .OrderBy($"{sortColumn} {sortOrder}")
@@ -67,9 +67,30 @@ namespace MyBGList.Controllers
             if (boardGame != null)
             {
                 if (!string.IsNullOrEmpty(model.Name))
+                {
                     boardGame.Name = model.Name;
+                }
                 if (model.Year.HasValue && model.Year.Value > 0)
+                {
                     boardGame.Year = model.Year.Value;
+                }
+                if (model.MinPlayers.HasValue && model.MinPlayers.Value > 0)
+                {
+                    boardGame.MinPlayers = model.MinPlayers.Value;
+                }
+                if (model.MaxPlayers.HasValue && model.MaxPlayers.Value > 0)
+                {
+                    boardGame.MaxPlayers = model.MaxPlayers.Value;
+                }
+                if (model.PlayTime.HasValue && model.PlayTime.Value > 0)
+                {
+                    boardGame.PlayTime = model.PlayTime.Value;
+                }
+                if (model.MinAge.HasValue && model.MinAge.Value > 0)
+                {
+                    boardGame.MinAge = model.MinAge.Value;
+                }
+
                 boardGame.LastModifiedDate = DateTime.Now;
                 _context.BoardGames.Update(boardGame);
                 await _context.SaveChangesAsync();
@@ -91,28 +112,37 @@ namespace MyBGList.Controllers
 
         [HttpDelete(Name = "DeleteBoardGame")]
         [ResponseCache(NoStore = true)]
-        public async Task<RestDTO<BoardGame?>> Delete(int id)
+        public async Task<RestDTO<BoardGame[]?>> Delete(string idList)
         {
-            var boardGame = await _context.BoardGames
-                .Where(b => b.Id == id)
-                .FirstOrDefaultAsync();
+            var readyIdList = idList
+                .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(int.Parse);
+            var deletedBoardGames = new List<BoardGame>();
 
-            if (boardGame != null)
+            foreach (int id in readyIdList)
             {
-                _context.BoardGames.Remove(boardGame);
-                await _context.SaveChangesAsync();
+                var boardGame = await _context.BoardGames
+                    .Where(b => b.Id == id)
+                    .FirstOrDefaultAsync();
+
+                if (boardGame != null)
+                {
+                    deletedBoardGames.Add(boardGame);
+                    _context.BoardGames.Remove(boardGame);
+                    await _context.SaveChangesAsync();
+                }
             }
 
-            return new RestDTO<BoardGame?>()
+            return new RestDTO<BoardGame[]?>()
             {
-                Data = boardGame,
+                Data = deletedBoardGames.Count > 0 ? deletedBoardGames.ToArray() : null,
                 Links = new List<LinkDTO>()
                 {
                     new LinkDTO(
                         Url.Action(
                             null,
                             "BoardGames",
-                            id,
+                            idList,
                             Request.Scheme
                         )!,
                         "self",
